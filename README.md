@@ -26,9 +26,10 @@ Segmentation :  predict the class of the object containing that pixel or ‘back
 • person  
 • bird, cat, cow, dog, horse, sheep • aeroplane, bicycle, boat, bus, car, motorbike, train  
 • bottle, chair, dining table, potted plant, sofa, tv/monitor  
-pixel indices correspond to classes in alphabetical order (1=aeroplane, 2=bicycle, 3=bird, 4=boat, 5=bottle, 6=bus, 7=car , 8=cat, 9=chair, 10=cow, 11=diningtable, 12=dog, 13=horse, 14=motorbike, 15=person, 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor)  
+pixel indices correspond to classes in alphabetical order  
+(1=aeroplane, 2=bicycle, 3=bird, 4=boat, 5=bottle, 6=bus, 7=car , 8=cat, 9=chair, 10=cow, 11=diningtable, 12=dog, 13=horse, 14=motorbike, 15=person, 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor)    
 
-[ROI（Region Of Interest](http://www.orbit.bio/annotations/)  
+[ROI（Region Of Interest）](http://www.orbit.bio/annotations/)  
 
 ## VOCdevkitの詳細情報  
 <詳細>  
@@ -197,17 +198,17 @@ Where the dataset reside.
 
 ## eval  
 ### eval.pyのハイパーパラメータについて  
---logtostderr 
---eval_logdir="${EVAL_LOGDIR}" 
---checkpoint_dir="${TRAIN_LOGDIR}" 
---eval_batch_size=1 
---model_variant="mobilenet_v2" 
---eval_crop_size=1025 
---eval_crop_size=2049 
---dataset='pepper' 
---eval_split="val" 
---dataset_dir="${PASCAL_DATASET}"  
---max_number_of_evaluations=1  
+> --logtostderr  
+--eval_logdir="${EVAL_LOGDIR}"   
+--checkpoint_dir="${TRAIN_LOGDIR}"   
+--eval_batch_size=1   
+--model_variant="mobilenet_v2"    
+--eval_crop_size=1025   
+--eval_crop_size=2049   
+--dataset='pepper'   
+--eval_split="val"   
+--dataset_dir="${PASCAL_DATASET}"    
+--max_number_of_evaluations=1    
 
 ・Shape mismatch in tuple component 1. Expected [513,513,3], got [800,1200,3]  
 Set eval_crop_size = output_stride * k + 1 for your dataset  
@@ -273,7 +274,7 @@ metrics_to_updates.values() : dict_values([<tensor>, <tensor>])
 
 ## Visualize  
 ### vis.pyのハイパーパラメータについて  
---logtostderr  
+> --logtostderr  
 --dataset='pepper'  
 --vis_split="val"  
 --model_variant="mobilenet_v2"  
@@ -287,7 +288,7 @@ metrics_to_updates.values() : dict_values([<tensor>, <tensor>])
 
 ## export_model  
 ### export_model.pyのハイパーパラメータについて    
---logtostderr  
+> --logtostderr  
 --checkpoint_path="${CKPT_PATH}"  
 --export_path="${EXPORT_PATH}"  
 --model_variant="mobilenet_v2"  
