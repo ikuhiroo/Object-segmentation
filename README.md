@@ -213,27 +213,29 @@ Where the dataset reside.
 Set eval_crop_size = output_stride * k + 1 for your dataset  
 pepperのサイズとPASCAL_VOCのcrop_sizeの違い？  
 --eval_crop_size=1025   
---eval_crop_size=2049  で解決?  
-・
+--eval_crop_size=2049  で解決? 
+
+・メトリックの設定
 accuracy[0.960437298]  
 precision[0.68037]  
 miou_1.0[0.441790938]  
 
-``# Define the evaluation metric.  
-    metric_map = {}  
-    # IoU : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか  
-    metric_map[predictions_tag] = tf.metrics.mean_iou(predictions, labels, dataset.num_classes, weights=weights)  
-    # accuracy  
-    metric_map["accuracy"] = tf.metrics.accuracy(predictions, labels, dataset.num_classes)  
-    # accuracy  
-    metric_map["precision"] = tf.metrics.precision(predictions, labels, dataset.num_classes)  
-    # recall  
-    # metric_map["recall"] = tf.metrics.recall(mean_relative_errors, 0.3)  
-    # metrics_to_values と metrics_to_updates を２つのリストに集計する  
-    metrics_to_values, metrics_to_updates = (tf.contrib.metrics.aggregate_metric_map(metric_map))  
-    for metric_name, metric_value in six.iteritems(metrics_to_values):  
-      slim.summaries.add_scalar_summary(metric_value, metric_name, print_summary=True)  
-``  
+``# Define the evaluation metric.``    
+``metric_map = {}``  
+``# IoU : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか``  
+``metric_map[predictions_tag] = tf.metrics.mean_iou(predictions, labels, dataset.num_classes, weights=weights)``  
+``# accuracy``  
+``metric_map["accuracy"] = tf.metrics.accuracy(predictions, labels, dataset.num_classes)``  
+``# accuracy``  
+``metric_map["precision"] = tf.metrics.precision(predictions, labels, dataset.num_classes)``  
+``# recall``  
+``# metric_map["recall"] = tf.metrics.recall(mean_relative_errors, 0.3)``
+
+``# metrics_to_values と metrics_to_updates を２つのリストに集計する``  
+``metrics_to_values, metrics_to_updates = (tf.contrib.metrics.aggregate_metric_map(metric_map))``  
+``for metric_name, metric_value in six.iteritems(metrics_to_values):``  
+``slim.summaries.add_scalar_summary(metric_value, metric_name, print_summary=True)``  
+
 ## Visualize  
 ### vis.pyのハイパーパラメータについて  
 --logtostderr  
