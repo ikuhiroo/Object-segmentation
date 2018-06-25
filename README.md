@@ -194,7 +194,7 @@ Save sample inputs, labels, and semantic predictions as images to summary.
 ●Settings for training strategy.    
 `training_number_of_steps = 30000`  
 The number of steps used for training  
-`train_batch_size = 8`  
+`train_batch_size = 12`  
 The number of images in each batch during training.  
 `upsample_logits = True`  
 Upsample logits during training.  
@@ -227,6 +227,46 @@ Where the dataset reside.
 ```
 ***
 ●eval  
+### eval.pyのハイパーパラメータについて  
+--logtostderr 
+--eval_logdir="${EVAL_LOGDIR}" 
+--checkpoint_dir="${TRAIN_LOGDIR}" 
+--eval_batch_size=1 
+--model_variant="mobilenet_v2" 
+--eval_crop_size=1025 
+--eval_crop_size=2049 
+--dataset='pepper' 
+--eval_split="val" 
+--dataset_dir="${PASCAL_DATASET}"  
+--max_number_of_evaluations=1  
+
 ・Shape mismatch in tuple component 1. Expected [513,513,3], got [800,1200,3]  
 Set eval_crop_size = output_stride * k + 1 for your dataset  
 pepperのサイズとPASCAL_VOCのcrop_sizeの違い？  
+--eval_crop_size=1025   
+--eval_crop_size=2049  で解決?  
+
+●Visualize  
+### vis.pyのハイパーパラメータについて  
+--logtostderr  
+--dataset='pepper'  
+--vis_split="val"  
+--model_variant="mobilenet_v2"  
+--vis_crop_size=1025  
+--vis_crop_size=2049  
+--checkpoint_dir="${TRAIN_LOGDIR}"  
+--vis_logdir="${VIS_LOGDIR}"  
+--dataset_dir="${PASCAL_DATASET}"  
+--colormap_type="pascal"  
+--max_number_of_iterations=1
+
+●export_model  
+### export_model.pyのハイパーパラメータについて  
+--logtostderr 
+--checkpoint_path="${CKPT_PATH}" 
+--export_path="${EXPORT_PATH}" 
+--model_variant="mobilenet_v2" 
+--num_classes=22 
+--crop_size=513 
+--crop_size=513 
+--inference_scales=1.0  
