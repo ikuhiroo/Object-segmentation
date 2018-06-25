@@ -1,58 +1,50 @@
-### 手順書
+# 手順書
 Classification :  predict the presence/absence  
 Detection : predict the bounding boxes of each object    
 Segmentation :  predict the class of the object containing that pixel or ‘background’  if the pixel does not belong to one of the twenty specified classes.  
-```
-```
-#### GPUに送るファイル  
 
-#### deeplab(tensorflow)をクローン  
- `$ git clone https://github.com/tensorflow/models.git`  
- #### 環境構築， 学習済みモデルの取得  
- `$cd models/research/deeplab `  
- `$sh ./local_test.sh `    
-```
-```
-***
-#### 自家製のデータセットを食わせる手順  
+## GPUに送るファイル  
+
+## deeplab(tensorflow)をクローン  
+`$ git clone https://github.com/tensorflow/models.git`  
+## 環境構築， 学習済みモデルの取得  
+`$cd models/research/deeplab `  
+`$sh ./local_test.sh `    
+
+## 自家製のデータセットを食わせる手順  
 ＜前処理＞   
 作成中  
 ＜学習＞  
 作成中　　
 ＜評価＞  
 作成中  
-```
-```
-***
-#### 学習済みモデルのデータセット（pascal voc 2012）  
+
+## 学習済みモデルのデータセット（pascal voc 2012）  
 [pascal voc devkit_doc](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/devkit_doc.pdf)  
+[pascal voc example](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/segexamples/index.html)  
 20 classes.  
 • person  
 • bird, cat, cow, dog, horse, sheep • aeroplane, bicycle, boat, bus, car, motorbike, train  
 • bottle, chair, dining table, potted plant, sofa, tv/monitor  
-```
-```
+pixel indices correspond to classes in alphabetical order (1=aeroplane, 2=bicycle, 3=bird, 4=boat, 5=bottle, 6=bus, 7=car , 8=cat, 9=chair, 10=cow, 11=diningtable, 12=dog, 13=horse, 14=motorbike, 15=person, 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor)  
+
 [ROI（Region Of Interest](http://www.orbit.bio/annotations/)  
-```
-```
-#### VOCdevkitの詳細情報  
+
+## VOCdevkitの詳細情報  
 <詳細>  
 ●JPEGImages  
 （説明）  
 オリジナルのJPEG画像  
-```
-```
+
 ●Annotations  
 （説明）  
 画像内の情報（boxの座標やクラス名）  
 `labelImg-master`でアノテーション付けを行う．  
-```
-```
+
 ●segmentation/SegmentationClass  
 （説明）  
 VOCのSegmentationClassにある画像はインデックスカラーによって着色されている．   
-```
-```
+
 ●segmentation/SegmentationClassRaw  
 （説明）  
 クラスのidが輝度値として使用されている．  
@@ -61,8 +53,6 @@ VOCのSegmentationClassにある画像はインデックスカラーによって
 （PASCAL_VOC）  
 > {0: 361560627, 1: 3704393, 2: 1571148, 3: 4384132, 4: 2862913, 5: 3438963, 6: 8696374, 7: 7088203, 8: 12473466, 9: 4975284, 10: 5027769, 11: 6246382, 12: 9379340, 13: 4925676, 14: 5476081, 15: 24995476, 16: 2904902, 17: 4187268, 18: 7091464, 19: 7903243, 20: 4120989, 255: 28568409}) 
 
-```
-```
 ●segmentation/SegmentationObject  
 （説明）
 ●ImageSets/Main  
@@ -73,30 +63,24 @@ AnnocationsとJPEGImagesディレクトリのファイル名(拡張子を除く)
 JPEGImages/2008_000008.jpg  
 Annotations/2008_000008.xml  
 
-```
-```
 （構成）  
 クラス名ごとに，trainval.txt, train.txt, val.txtがある．  
 `{class_name}_trainval.txt`  
 `{class_name}_train.txt`  
 `{class_name}_val.txt`  
-```
-```
+
 ●ImageSets/Segmentation  
 （説明）  
 trainval.txt, train.txt, val.txtが，tf-recordにconvertされる  
 （構成）   
 `filename`
-```
-```
+
 ●ImageSets/Action  
 （説明）  
 personクラスに対して存在し，動作ごとにファイルがある   
 ●ImageSets/Layout  
-```
-```
-***
-#### 新規のクラスを追加する場合  
+
+## 新規のクラスを追加する場合  
 ●trainvalの分割方法の設定し，ファイルを追加する  
  ` $python create_trainval.py `  
 ●用いられている輝度値の確認    
@@ -104,15 +88,12 @@ personクラスに対して存在し，動作ごとにファイルがある
 >（PASCAL_VOC）  
 {0: 361560627, 1: 3704393, 2: 1571148, 3: 4384132, 4: 2862913, 5: 3438963, 6: 8696374, 7: 7088203, 8: 12473466, 9: 4975284, 10: 5027769, 11: 6246382, 12: 9379340, 13: 4925676, 14: 5476081, 15: 24995476, 16: 2904902, 17: 4187268, 18: 7091464, 19: 7903243, 20: 4120989, 255: 28568409})  
 
-```
-```
 >（PASCAL_VOC + PEPPER）  
 {0: 441731424, 1: 3704393, 2: 1571148, 3: 4384132, 4: 2862913, 5: 3438963, 6: 8696374, 7: 7088203, 8: 12473466, 9: 4975284, 10: 5027769, 11: 6246382, 12: 9379340, 13: 4925676, 14: 5476081, 15: 24995476, 16: 2904902, 17: 4187268, 18: 7091464, 19: 7903243, 20: 4120989, 21: 9762030, 255: 28568409})  
  
 背景（黒） → 0  
 輪郭（白）→ 255  
-```
-```
+
 ●アノテーションツール（labelImg）  
 （説明）  
 boxの位置とクラス名  
@@ -126,6 +107,7 @@ semantic segmentationを作成する．
 → jsonファイルの作成  
  ` $ python json_to_png.py   `
 → pngファイルの作成  
+
 ●trainvalの分割方法の設定し，ファイルに情報を追加する  
  ` $python create_trainval.py `  
 >pascal  
@@ -136,8 +118,6 @@ segment_train_val : 2913
 segment_train : 1464  
 segment_val : 1449 
 
-```
-```
 >pascal + pepper  
 images_train_val : 11755  
 images_train : 5889  
@@ -153,8 +133,7 @@ _DATASETS_INFORMATIONの内容に追加
 ・pascal_voc_seg : _PASCAL_VOC_SEG_INFORMATION  
 ・ade20k : _ADE20K_INFORMATION  
 ・pepperに関するDatasetDescriptorの生成  
-```
-```
+
 DatasetDescriptorの内容（base）  
 ・splits_to_sizes  
 Splits of the dataset into training, val, and test.    
@@ -162,8 +141,7 @@ Splits of the dataset into training, val, and test.
 Number of semantic classes.  
 ・ignore_label  
 Ignore label value.  
-```
-```
+
 ex.  
 `_PEPPER_INFORMATION = DatasetDescriptor(  
     splits_to_sizes={  
@@ -174,9 +152,8 @@ ex.
     num_classes=22,  
     ignore_label=255,  
 )  `   
-```
-```
-***
+
+## train
 ### train.pyのハイパーパラメータについて  
 ●Settings for logging.  
 `train_logdir = None`  
@@ -189,8 +166,7 @@ How often, in seconds, we save the model to disk.
 How often, in seconds, we compute the summaries.  
 `save_summaries_images = false`  
 Save sample inputs, labels, and semantic predictions as images to summary.  
-```
-```
+
 ●Settings for training strategy.    
 `training_number_of_steps = 30000`  
 The number of steps used for training  
@@ -198,8 +174,7 @@ The number of steps used for training
 The number of images in each batch during training.  
 `upsample_logits = True`  
 Upsample logits during training.  
-```
-```
+
 ●Settings for fine-tuning the network.     
 `tf_initial_checkpoint = None`  
 TensorFlow checkpoint for initialization.  
@@ -211,8 +186,7 @@ Only consider logits as last layers or not.
 `fine_tune_batch_norm = true`  
 When fine_tune_batch_norm=True, use at least batch size larger than 12  
 otherwise use smaller batch.  
-```
-```
+
 ●Dataset settings.  
 `dataset = pepper`  
 Name of the segmentation dataset.  
@@ -220,13 +194,8 @@ Name of the segmentation dataset.
 Which split of the dataset to be used for training  
 `dataset_dir = None`  
 Where the dataset reside.  
-```
-```
-●train  
-```
-```
-***
-●eval  
+
+## eval  
 ### eval.pyのハイパーパラメータについて  
 --logtostderr 
 --eval_logdir="${EVAL_LOGDIR}" 
@@ -245,8 +214,27 @@ Set eval_crop_size = output_stride * k + 1 for your dataset
 pepperのサイズとPASCAL_VOCのcrop_sizeの違い？  
 --eval_crop_size=1025   
 --eval_crop_size=2049  で解決?  
+・
+accuracy[0.960437298]  
+precision[0.68037]  
+miou_1.0[0.441790938]  
 
-●Visualize  
+``# Define the evaluation metric.  
+    metric_map = {}  
+    # IoU : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか  
+    metric_map[predictions_tag] = tf.metrics.mean_iou(predictions, labels, dataset.num_classes, weights=weights)  
+    # accuracy  
+    metric_map["accuracy"] = tf.metrics.accuracy(predictions, labels, dataset.num_classes)  
+    # accuracy  
+    metric_map["precision"] = tf.metrics.precision(predictions, labels, dataset.num_classes)  
+    # recall  
+    # metric_map["recall"] = tf.metrics.recall(mean_relative_errors, 0.3)  
+    # metrics_to_values と metrics_to_updates を２つのリストに集計する  
+    metrics_to_values, metrics_to_updates = (tf.contrib.metrics.aggregate_metric_map(metric_map))  
+    for metric_name, metric_value in six.iteritems(metrics_to_values):  
+      slim.summaries.add_scalar_summary(metric_value, metric_name, print_summary=True)  
+``  
+## Visualize  
 ### vis.pyのハイパーパラメータについて  
 --logtostderr  
 --dataset='pepper'  
@@ -260,7 +248,7 @@ pepperのサイズとPASCAL_VOCのcrop_sizeの違い？
 --colormap_type="pascal"  
 --max_number_of_iterations=1
 
-●export_model  
+## export_model  
 ### export_model.pyのハイパーパラメータについて  
 --logtostderr 
 --checkpoint_path="${CKPT_PATH}" 
