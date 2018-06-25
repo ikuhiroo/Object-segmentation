@@ -244,6 +244,11 @@ miou_1.0[0.441790938]
 boxの精度も下がっている．  
 学習回数が足りない？アノテーション付けがよくない？  
 
+labelsとpresitionsを標準出力できない理由？  
+長すぎる？何か手続きを飛ばしている？  
+サーバーエラー  
+→ tensorflow.python.framework.errors_impl.InternalError: Failed to create session.  
+
 ・eval.pyについて  
 labels : The ground truth values, Tensor("Reshape_8:0", shape=(?,), dtype=int64)    
 predictions : The predicted values, Tensor("Select:0", shape=(?,), dtype=int32)  
