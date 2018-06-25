@@ -215,26 +215,56 @@ pepperのサイズとPASCAL_VOCのcrop_sizeの違い？
 --eval_crop_size=1025   
 --eval_crop_size=2049  で解決? 
 
-・メトリックの設定
-accuracy[0.960437298]  
-precision[0.68037]  
+・メトリックの設定  
+[tf.metric](https://electric-blue-industries.com/wp/machine-learnings/python-modules/python-modules-tensorflow/tf-metrics/)   
+
+tf.metric.accuracy : 正解率, (過去の合計正答数total) / (データ数)
+mean_per_class_accuracy : クラスごとの精度の平均  
+precision : 適合率    
+false_negatives : 偽陰性の総数    
+miou_1.0 : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
+
+・初期の学習済みモデルを用いて，１０回学習させた場合  
+accuracy[0.943350315]  
+mean_per_class_accuracy[0.847709656]  
+precision[0.922471046]  
+false_negatives[0.687992334]  
+miou_1.0[0.75342977]  
+
+・新しい画像を使って，学習させた結果  
+accuracy[0.887568057]  
+mean_per_class_accuracy[0.49432373]     
+precision[0.961355925]  
+false_negatives[0.32001844]   
 miou_1.0[0.441790938]  
 
+・考察
+正解率が下がっているのは，pepperの画像が混じったからか？  
+クラスごとの精度の平均が下がっている．  
+boxの精度も下がっている．  
+学習回数が足りない？アノテーション付けがよくない？  
+
+・eval.pyについて  
+labels : The ground truth values, Tensor("Reshape_8:0", shape=(?,), dtype=int64)    
+predictions : The predicted values, Tensor("Select:0", shape=(?,), dtype=int32)  
+
+tf.contrib.metrics.aggregate_metric_map(metric_map) : tuple型, ({}, {})  
+(tf.contrib.metrics.aggregate_metric_map(metric_map)) : tuple型, ({}, {})  
+
+metrics_to_values : precision/value:0, dtype=float32, {<tensor>, <tensor>}  
+metrics_to_updates : precision/update_op:0, dtype=float32, {<tensor>, <tensor>}  
+metrics_to_updates.values() : dict_values([<tensor>, <tensor>])  
+
 ``# Define the evaluation metric.``    
-``metric_map = {}``  
-``# IoU : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか``  
-``metric_map[predictions_tag] = tf.metrics.mean_iou(predictions, labels, dataset.num_classes, weights=weights)``  
-``# accuracy``  
-``metric_map["accuracy"] = tf.metrics.accuracy(predictions, labels, dataset.num_classes)``  
-``# accuracy``  
-``metric_map["precision"] = tf.metrics.precision(predictions, labels, dataset.num_classes)``  
-``# recall``  
-``# metric_map["recall"] = tf.metrics.recall(mean_relative_errors, 0.3)``
+``metric_map = {}に追加``  
 
 ``# metrics_to_values と metrics_to_updates を２つのリストに集計する``  
 ``metrics_to_values, metrics_to_updates = (tf.contrib.metrics.aggregate_metric_map(metric_map))``  
 ``for metric_name, metric_value in six.iteritems(metrics_to_values):``  
 ``slim.summaries.add_scalar_summary(metric_value, metric_name, print_summary=True)``  
+
+・tensorboardで可視化  
+`tensorboard --logdir=./`  
 
 ## Visualize  
 ### vis.pyのハイパーパラメータについて  
@@ -251,12 +281,12 @@ miou_1.0[0.441790938]
 --max_number_of_iterations=1
 
 ## export_model  
-### export_model.pyのハイパーパラメータについて  
---logtostderr 
---checkpoint_path="${CKPT_PATH}" 
---export_path="${EXPORT_PATH}" 
---model_variant="mobilenet_v2" 
---num_classes=22 
---crop_size=513 
---crop_size=513 
+### export_model.pyのハイパーパラメータについて    
+--logtostderr  
+--checkpoint_path="${CKPT_PATH}"  
+--export_path="${EXPORT_PATH}"  
+--model_variant="mobilenet_v2"  
+--num_classes=22  
+--crop_size=513  
+--crop_size=513  
 --inference_scales=1.0  
