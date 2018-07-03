@@ -311,6 +311,11 @@ eval_1
 20_accuracy: 31.177594406731433 % 
 accuracy : 96.09456129700389 %  
 ```
+・true    
+<img src="https://github.com/ikuhiroo/Object-segmentation/blob/master/2007_000033_true.png" width=50%>  
+・pred  
+<img src="https://github.com/ikuhiroo/Object-segmentation/blob/master/2007_000033_pred.png" width=50%>  
+
 処理が終わった後，    
 クラスごとの認識率表示させる．  
 ```
