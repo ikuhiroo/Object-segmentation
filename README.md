@@ -289,13 +289,19 @@ segment_val : 1492
 
 ### ●[tf.metric](https://electric-blue-industries.com/wp/machine-learnings/python-modules/python-modules-tensorflow/tf-metrics/)  を用いて評価
 
-#### ・tf.metric.accuracy : 正解率, (過去の合計正答数total) / (データ数)
-#### ・mean_per_class_accuracy : クラスごとの精度の平均  
-#### ・precision : 適合率    
-#### ・false_negatives : 偽陰性の総数    
-#### ・miou_1.0 : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
+#### ・tf.metric.accuracy
+##### 正解率, (過去の合計正答数total) / (データ数)
+#### ・mean_per_class_accuracy
+##### クラスごとの精度の平均  
+#### ・precision
+##### 適合率    
+#### ・false_negatives
+##### 偽陰性の総数    
+#### ・miou_1.0
+##### boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
 
 ### ●初期の学習済みモデルを用いて，１０回学習させた場合  
+#### 結果1（`python eval.py`）
 ```
 accuracy[0.943350315]  
 mean_per_class_accuracy[0.847709656]  
@@ -303,7 +309,33 @@ precision[0.922471046]
 false_negatives[0.687992334]  
 miou_1.0[0.75342977]  
 ```
-### ●新しい画像を使って，学習させた結果  
+#### 結果2（`python eval0.py`）
+```
+edge         0_accuracy: 86.5819690551117 % 
+aeroplane    1_accuracy: 93.99845722278008 % 
+bicycle      2_accuracy: 81.85716486131588 % 
+bird         3_accuracy: 89.31383046180657 % 
+boat         4_accuracy: 89.2741476044005 % 
+bottle       5_accuracy: 67.78285804004202 % 
+bus          6_accuracy: 92.48821158813442 % 
+car          7_accuracy: 81.50931779330695 % 
+cat          8_accuracy: 94.63598087766903 % 
+chair        9_accuracy: 56.628017201823795 % 
+cow          10_accuracy: 93.8124551416695 % 
+diningtable  11_accuracy: 60.31791656604843 % 
+dog          12_accuracy: 93.8508213015269 % 
+horse        13_accuracy: 93.23947809726272 % 
+motorbike    14_accuracy: 92.92242241704558 % 
+person       15_accuracy: 83.55709018384393 % 
+potted plant 16_accuracy: 61.9201044111386 % 
+sheep        17_accuracy: 91.03804536000922 % 
+sofa         18_accuracy: 68.10712464936924 % 
+train        19_accuracy: 96.32077194416111 % 
+tv/monitor   20_accuracy: 79.72798036113859 % 
+```
+### ●新しい画像を使って，学習させた結果
+#### --train_crop_size=1025 \--train_crop_size=2049 \
+#### 結果1（`python eval.py`）
 ```
 accuracy[0.887568057]  
 mean_per_class_accuracy[0.49432373]     
@@ -311,26 +343,37 @@ precision[0.961355925]
 false_negatives[0.32001844]   
 miou_1.0[0.441790938]  
 ```
-バッチごとに，  
-まず，「(true, pred) : 認識率(%)」の上位3件を表示．  
-また，trueに対する認識率(%)を表示． 
-最後に，trueに対する全体の認識率を表示．  
+#### 結果2（`python eval0.py`）
 ```
-eval_1  
-(0, 12) : 31.884959096838696 %  
-(20, 0) : 20.641771210514122 %  
-(0, 13) : 18.063226168269875 %  
-0_accuracy: 96.86397921781594 %  
-20_accuracy: 31.177594406731433 % 
-accuracy : 96.09456129700389 %  
+Edge         0_accuracy: 96.84267431853029 % 
+aeroplane    1_accuracy: 57.357618018805816 % 
+bicycle      2_accuracy: 0.0 % 
+bird         3_accuracy: 49.55682088565027 % 
+boat         4_accuracy: 16.517761537994804 % 
+bottle       5_accuracy: 0.08028326685488951 % 
+bus          6_accuracy: 72.51021481737355 % 
+car          7_accuracy: 45.66972298631186 % 
+cat          8_accuracy: 75.63807704904475 % 
+chair        9_accuracy: 0.13013601331749589 % 
+cow          10_accuracy: 61.40326484451494 %
+diningtable  11_accuracy: 9.461895429316897 % 
+dog          12_accuracy: 76.36539074135965 % 
+horse        13_accuracy: 68.5181200573232 % 
+motorbike    14_accuracy: 57.87662859525158 % 
+person       15_accuracy: 71.1393828885102 % 
+potted plant 16_accuracy: 0.0 % 
+sheep        17_accuracy: 46.77391369287723 % 
+sofa         18_accuracy: 56.46067461595401 % 
+train        19_accuracy: 65.60469802975989 % 
+tv/monitor   20_accuracy: 40.424908601558336 % 
+Pepper       21_accuracy: 87.54083190904221 % 
 ```
+#### ・考察
 ・pepperの画像を加えると，PASCALのクラスに対する認識率が下がる
 →pepper認識器になっている
-#### ・考察
-正解率が下がっているのは，pepperの画像が混じったからか？  
-クラスごとの精度の平均が下がっている．  
-boxの精度も下がっている．  
-学習回数が足りない？アノテーション付けがよくない？  
+・クラスごとの精度の平均が下がっている．  
+・boxの精度も下がっている．  
+・アノテーション付けがよくない？  
 
 ## Visualize  
 ### ハイパーパラメータ設定  
@@ -339,7 +382,9 @@ boxの精度も下がっている．
 #### ・`vis_split="val"`
 #### ・`model_variant="mobilenet_v2"`
 #### ・`vis_crop_size=1025`
+##### default : 513
 #### ・`vis_crop_size=2049`
+##### default : 513
 #### ・`checkpoint_dir=（パス指定）`
 #### ・`vis_logdir=（パス指定）`
 #### ・`dataset_dir=（パス指定）`
