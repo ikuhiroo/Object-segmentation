@@ -45,9 +45,9 @@ pixel indices correspond to classes in alphabetical order
 
 ### ●segmentation/SegmentationClass  
 #### インデックスカラーによって着色された画像
-
 ### ●segmentation/SegmentationClassRaw  
-#### ・クラスのidを輝度値として着色された画像  
+#### ・ラベルデータ
+##### SegmentationClassフォルダの画像の色を全部消して，エッジ検出のみをした画像を生成する．エッジの内部には各ラベルの色がグレースケールで書き込まれている．
 #### ・` $ python check_convert.py `  
 ##### 用いられている輝度値の確認  （PASCAL_VOC）  
 > {0: 361560627, 1: 3704393, 2: 1571148, 3: 4384132, 4: 2862913, 5: 3438963, 6: 8696374, 7: 7088203, 8: 12473466, 9: 4975284, 10: 5027769, 11: 6246382, 12: 9379340, 13: 4925676, 14: 5476081, 15: 24995476, 16: 2904902, 17: 4187268, 18: 7091464, 19: 7903243, 20: 4120989, 255: 28568409}) 
@@ -89,7 +89,6 @@ val-00001-of-00004.tfrecord
 val-00002-of-00004.tfrecord
 val-00003-of-00004.tfrecord
 ```
-
 
 ### ●ImageSets/Action  
 どこで呼び出されているかが不明？
@@ -160,8 +159,8 @@ segment_val : 1492
 ##### Splits of the dataset into training, val, and test.    
 ##### ・num_classes    
 ##### Number of semantic classes.  
-##### ・ignore_label  
-##### Ignore label value.  
+##### ・ignore_label
+##### 255（edge）→クラスではなく境界なので除く
 
 #### ex.  pepperの画像を加え，22クラスにした場合，
 ```_PEPPER_INFORMATION = DatasetDescriptor(
@@ -174,6 +173,9 @@ segment_val : 1492
     ignore_label=255,  
 )
 ```  
+## create tf-recode
+#### `sh tf_convert_voc2012.sh`
+#### ・`WORK_DIR=（パス指定）`
 
 ## train
 ### ハイパーパラメータ設定（defaultはfine-tuning前の値）
@@ -301,7 +303,7 @@ segment_val : 1492
 ##### boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
 
 ### ●初期の学習済みモデルを用いて，１０回学習させた場合  
-#### 結果1（`python eval.py`）
+#### ・結果1（`python eval.py`）
 ```
 accuracy[0.943350315]  
 mean_per_class_accuracy[0.847709656]  
@@ -309,9 +311,9 @@ precision[0.922471046]
 false_negatives[0.687992334]  
 miou_1.0[0.75342977]  
 ```
-#### 結果2（`python eval0.py`）
+#### ・結果2（`python eval0.py`）
 ```
-edge         0_accuracy: 86.5819690551117 % 
+background   0_accuracy: 86.5819690551117 % 
 aeroplane    1_accuracy: 93.99845722278008 % 
 bicycle      2_accuracy: 81.85716486131588 % 
 bird         3_accuracy: 89.31383046180657 % 
@@ -335,7 +337,7 @@ tv/monitor   20_accuracy: 79.72798036113859 %
 ```
 ### ●新しい画像を使って，学習させた結果
 #### --train_crop_size=1025 \--train_crop_size=2049 \
-#### 結果1（`python eval.py`）
+#### ・結果1（`python eval.py`）
 ```
 accuracy[0.887568057]  
 mean_per_class_accuracy[0.49432373]     
@@ -343,9 +345,9 @@ precision[0.961355925]
 false_negatives[0.32001844]   
 miou_1.0[0.441790938]  
 ```
-#### 結果2（`python eval0.py`）
+#### ・結果2（`python eval0.py`）
 ```
-Edge         0_accuracy: 96.84267431853029 % 
+background   0_accuracy: 96.84267431853029 % 
 aeroplane    1_accuracy: 57.357618018805816 % 
 bicycle      2_accuracy: 0.0 % 
 bird         3_accuracy: 49.55682088565027 % 
@@ -374,6 +376,7 @@ Pepper       21_accuracy: 87.54083190904221 %
 ・クラスごとの精度の平均が下がっている．  
 ・boxの精度も下がっている．  
 ・アノテーション付けがよくない？  
+・crop_sizeが異なるのがダメなのか
 
 ## Visualize  
 ### ハイパーパラメータ設定  
