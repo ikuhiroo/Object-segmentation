@@ -204,11 +204,13 @@ segment_val : 1492
 #### ・`training_number_of_steps = 30000`  
 ##### The number of steps used for training  
 ##### default : 30000
-##### test1 : 10000
+##### test1 : 30000
+##### test2 : 30000
 #### ・`train_batch_size = 4`  
 ##### The number of images in each batch during training.  
 ##### default : 4
 ##### test1 : 12（？）
+##### test2 : 4 
 #### ・`fine_tune_batch_norm = True`  
 ##### Set to True if one wants to fine-tune the batch norm parameters in DeepLabv3
 ##### When fine_tune_batch_norm=True, use at least batch size larger than 12  
@@ -241,6 +243,7 @@ segment_val : 1492
 ##### Image crop size [height, width] during training.
 ##### default : [513, 513]
 ##### test1 :  [513, 513]
+##### test2 :  [513, 513]
 #### ・`atrous_rates = None`
 ##### A list of atrous convolution rates for ASPP.
 ##### Atrous rates for atrous spatial pyramid pooling.
@@ -251,11 +254,13 @@ segment_val : 1492
 ##### atrous_rates = None
 ##### default : None
 ##### test1 : 1（原因？）
+##### test2 : None
 ##### one could use different atrous_rates/output_stride during training/evaluation.
 #### ・`output_stride = 16`
 ##### The ratio of input to output spatial resolution.
 ##### default : 16
 ##### test1 : 16
+##### test2 : 16
 
 #### ●Dataset settings.  
 #### ・`dataset = pepper`  
@@ -263,6 +268,8 @@ segment_val : 1492
 #### ・`train_split = train`  
 ##### Which split of the dataset to be used for training  
 ##### default : trainval
+##### test1 : train
+##### test2 : train
 #### ・`dataset_dir = (パス指定)`  
 ##### Where the dataset reside.  
 
@@ -286,9 +293,6 @@ segment_val : 1492
 #### ・`dataset_dir=（パス指定）`    
 #### ・`max_number_of_evaluations=1`    
 
-### ●エラーメッセージ
-#### Shape mismatch in tuple component 1. Expected [513,513,3], got [800,1200,3] .
-
 ### ●[tf.metric](https://electric-blue-industries.com/wp/machine-learnings/python-modules/python-modules-tensorflow/tf-metrics/)  を用いて評価
 
 #### ・tf.metric.accuracy
@@ -302,7 +306,12 @@ segment_val : 1492
 #### ・miou_1.0
 ##### boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
 
-### ●初期の学習済みモデルを用いて，１０回学習させた場合  
+### ●初期の学習済みモデルを用いて，１０回学習させた場合
+```
+train_crop_size=513 \--train_crop_size=513 \
+atrous_rates = None
+train_batch_size =4
+```  
 #### ・結果1（`python eval.py`）
 ```
 accuracy[0.943350315]  
@@ -336,7 +345,12 @@ train        19_accuracy: 96.32077194416111 %
 tv/monitor   20_accuracy: 79.72798036113859 % 
 ```
 ### ●新しい画像を使って，学習させた結果
-#### --train_crop_size=1025 \--train_crop_size=2049 \
+#### ＜test1＞
+```
+train_crop_size=1025 \--train_crop_size=2049 \
+atrous_rates = 1
+train_batch_size =12
+```
 #### ・結果1（`python eval.py`）
 ```
 accuracy[0.887568057]  
@@ -394,7 +408,7 @@ Pepper       21_accuracy: 87.54083190904221 %
 ・heightの大きさ別の辞書
 {'500<': 83, '<501': 4230, '<401': 12324, '<301': 607, '<201': 94, '<101': 2}
 ```
-##### →画像サイズを500以下にすることでcrop_sizeを513にできる
+##### →画像サイズを500以下にすることでcrop_sizeを513にする
 ##### Jpegimage, segmentclass, segmentclassrawに関してリサイズする
 ```
 ・max_weight = 500
@@ -404,6 +418,49 @@ Pepper       21_accuracy: 87.54083190904221 %
 ・heightの大きさ別の辞書
 {'500<': 0, '<501': 4313, '<401': 12324, '<301': 607, '<201': 94, '<101': 2}
 ```
+#### ＜test1 + 画像のリサイズ＞
+```
+train_crop_size=513 \--train_crop_size=513 \
+atrous_rates = 1
+train_batch_size =12
+```  
+#### ・結果1（`python eval.py`）
+#### ・結果2（`python eval0.py`）
+```
+background   0_accuracy: 79.83268837195813 % 
+aeroplane    1_accuracy: 70.29743474465448 % 
+bicycle      2_accuracy: 0.0 % 
+bird         3_accuracy: 59.817513361529855 % 
+boat         4_accuracy: 22.980626613592072 % 
+bottle       5_accuracy: 4.457471785045232 % 
+bus          6_accuracy: 85.12058474504335 % 
+car          7_accuracy: 53.33485941567018 % 
+cat          8_accuracy: 85.40458800642416 % 
+chair        9_accuracy: 4.707605310256958 % 
+cow          10_accuracy: 71.72808385369187 % 
+diningtable  11_accuracy: 37.83437542877774 % 
+dog          12_accuracy: 82.12801205825353 % 
+horse        13_accuracy: 75.92725065729479 % 
+motorbike    14_accuracy: 83.62610321250902 % 
+person       15_accuracy: 69.11130940630152 % 
+potted plant 16_accuracy: 0.2072029153511162 % 
+sheep        17_accuracy: 66.19039280583036 % 
+sofa         18_accuracy: 67.24266055892082 % 
+train        19_accuracy: 81.29887659779264 % 
+tv/monitor   20_accuracy: 49.954003233790196 % 
+Pepper       21_accuracy: 91.54952904389178 % 
+```
+#### ・考察
+##### ・pepperの認識率は高くなったが，他のクラスの認識率は向上していない
+
+#### ＜test2＞
+```
+train_crop_size=513 \--train_crop_size=513 \
+atrous_rates = None
+train_batch_size = 4
+```  
+#### ・結果1（`python eval.py`）
+#### ・結果2（`python eval0.py`）
 
 ## Visualize  
 ### ハイパーパラメータ設定  
@@ -423,13 +480,15 @@ Pepper       21_accuracy: 87.54083190904221 %
 
 ## export_model  
 ### ハイパーパラメータ設定
-#### ・`--logtostderr`
+#### ・`logtostderr`
 #### ・`checkpoint_path=（パス指定）`
 #### ・`export_path=（パス指定）"`
 #### ・`model_variant="mobilenet_v2"`
 #### ・`num_classes=22`  
 #### ・`crop_size=513`
+##### default : 513
 #### ・`crop_size=513`
+##### default : 513
 #### ・`inference_scales=1.0`
 
 > Written with [StackEdit](https://stackedit.io/).
