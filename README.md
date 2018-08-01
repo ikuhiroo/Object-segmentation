@@ -73,7 +73,23 @@ Annotations/2008_000008.xml
 
 ### ●ImageSets/Segmentation  
 #### ・trainval.txt, train.txt, val.txtを参考にしてtf-recodeにconvertされる  
-`filename`
+```
+tfrecodeディレクトリ内のファイルと対応
+
+trainval-00000-of-00004.tfrecord
+trainval-00001-of-00004.tfrecord
+trainval-00002-of-00004.tfrecord
+trainval-00003-of-00004.tfrecord
+train-00000-of-00004.tfrecord
+train-00001-of-00004.tfrecord
+train-00002-of-00004.tfrecord
+train-00003-of-00004.tfrecord
+val-00000-of-00004.tfrecord
+val-00001-of-00004.tfrecord
+val-00002-of-00004.tfrecord
+val-00003-of-00004.tfrecord
+```
+
 
 ### ●ImageSets/Action  
 どこで呼び出されているかが不明？
@@ -85,6 +101,13 @@ Annotations/2008_000008.xml
 >filename 1/2 
 
 ## 新規のクラスを追加する場合  
+### ●pepper_test.shにおける設定
+#### ・ working directoriesのSet up
+`PASCAL_FOLDER="pepper_pascal_voc_seg"`
+`EXP_FOLDER="exp/train_on_trainval_set_mobilenetv2"`
+#### ・モデルの指定
+`CKPT_NAME="deeplabv3_mnv2_pascal_train_aug"`
+
 ### ●trainvalの分割方法の設定し，ファイルを追加する  
  ` $python create_trainval.py `  
 ### ●用いられている輝度値の確認    
@@ -140,7 +163,7 @@ segment_val : 1492
 ##### ・ignore_label  
 ##### Ignore label value.  
 
-ex.  
+#### ex.  pepperの画像を加え，22クラスにした場合，
 ```_PEPPER_INFORMATION = DatasetDescriptor(
     splits_to_sizes={  
         'train': 1636,  
@@ -153,155 +176,141 @@ ex.
 ```  
 
 ## train
-### ハイパーパラメータ設定
+### ハイパーパラメータ設定（defaultはfine-tuning前の値）
 #### ●Settings for logging.  
-`train_logdir = None`  
-Where the checkpoint and logs are stored.  
-`log_steps = 10`  
-Display logging information at every log_steps.  
-`save_interval_secs = 1200`  
-How often, in seconds, we save the model to disk.  
-`save_summaries_secs = 600`  
-How often, in seconds, we compute the summaries.  
-`save_summaries_images = false`  
-Save sample inputs, labels, and semantic predictions as images to summary.  
+#### ・`train_logdir = (パス指定)`  
+##### Where the checkpoint and logs are stored.  
+##### default : (パス指定)
+#### ・`log_steps = 10`  
+##### Display logging information at every log_steps.  
+##### default : 10
+#### ・`save_interval_secs = 1200`  
+##### How often, in seconds, we save the model to disk.  
+##### default : 1200
+#### ・`save_summaries_secs = 600`  
+##### How often, in seconds, we compute the summaries.  
+##### default : 600
+#### ・`save_summaries_images = True`  
+##### Save sample inputs, labels, and semantic predictions as images to summary.  
+##### default : False
+##### test1 : False
 
-#### ●Settings for training strategy.    
-##### ・`training_number_of_steps = 30000`  
+#### ●Settings ModelOptions.    
+#### ・`model_variant="mobilenet_v2"` 
+##### DeepLab model variant   
+##### common.pyで設定
+#### ・`training_number_of_steps = 30000`  
 ##### The number of steps used for training  
-##### ・`train_batch_size = 12`  
+##### default : 30000
+##### test1 : 10000
+#### ・`train_batch_size = 4`  
 ##### The number of images in each batch during training.  
-##### ・`upsample_logits = True`  
-##### Upsample logits during training.  
-
-#### ●Settings for fine-tuning the network.     
-##### ・`tf_initial_checkpoint = None`  
-##### TensorFlow checkpoint for initialization.  
-##### ・`initialize_last_layer = true`  
-##### Initialize last layer or not.  
-##### Set to False if one does not want to re-use the trained classifier weights.  
-##### ・`last_layers_contain_logits_only = false`  
-##### Only consider logits as last layers or not.  
-##### ・`fine_tune_batch_norm = true`  
+##### default : 4
+##### test1 : 12
+#### ・`fine_tune_batch_norm = True`  
+##### Set to True if one wants to fine-tune the batch norm parameters in DeepLabv3
 ##### When fine_tune_batch_norm=True, use at least batch size larger than 12  
+##### Set to False and use small batch size to save GPU memory
 ##### otherwise use smaller batch.  
+##### default : True
+#### ・`upsample_logits = True`  
+##### default :  True
+##### Upsample logits during training.  
+#### ・`tf_initial_checkpoint = (パス指定)`  
+##### Settings for fine-tuning the network.
+##### default : (パス指定)
+#### ・`base_learning_rate = .0001`
+##### The base learning rate for model training.
+##### upsample_logits = True(when training on PASCAL augmented training set) → Use 0.007
+###### tf_initial_checkpoint != None(When fine-tuning on PASCAL trainval set) → use learning rate=0.0001.
+##### default : .0001
+##### test1 :  .0001
+#### ・`initialize_last_layer = False`  
+##### Initialize last layer or not.  
+##### Set to False if one does not want to re-use the trained classifier weights.
+##### クラス数を増やしたため，最終層は学習済みモデルを使わない→False
+##### default : True
+##### test1 :  False
+#### ・`last_layers_contain_logits_only = False`  
+##### Only consider logits as last layers or not.  
+##### default : False
+##### test1 :  False
+#### ・`train_crop_size=513 \ train_crop_size=513`
+##### Image crop size [height, width] during training.
+##### default : [513, 513]
+##### test1 :  [513, 513]
+#### ・`atrous_rates = None`
+##### A list of atrous convolution rates for ASPP.
+##### Atrous rates for atrous spatial pyramid pooling.
+##### xception_65の場合，
+##### output_stride = 8 → atrous_rates = [12, 24, 36]
+##### output_stride = 16 → atrous_rates = [6, 12, 18]
+##### mobilenet_v2の場合，
+##### atrous_rates = None
+##### default : None
+##### test1 : 1（原因？）
+##### one could use different atrous_rates/output_stride during training/evaluation.
+#### ・`output_stride = 16`
+##### The ratio of input to output spatial resolution.
+##### default : 16
+##### test1 : 16
 
 #### ●Dataset settings.  
-##### ・`dataset = pepper`  
+#### ・`dataset = pepper`  
 ##### Name of the segmentation dataset.  
-##### ・`train_split = train`  
+#### ・`train_split = train`  
 ##### Which split of the dataset to be used for training  
-##### ・`dataset_dir = None`  
+##### default : trainval
+#### ・`dataset_dir = (パス指定)`  
 ##### Where the dataset reside.  
 
 ## eval  
-### ・ハイパーパラメータ設定  
-#### ●Settings for eval strategy.
-##### ・`logtostderr`  
-##### ・`eval_logdir="${EVAL_LOGDIR}" `  
-##### ・`checkpoint_dir="${TRAIN_LOGDIR}"`   
-##### ・`eval_batch_size=1`   
-##### ・`model_variant="mobilenet_v2"`    
-##### ・`eval_crop_size=1025`   
-##### ・`eval_crop_size=2049`  
+### ●ハイパーパラメータ設定（defaultはfinetuning前の値）
+#### Settings ModelOptions.    
+#### ・`logtostderr`  
+#### ・`eval_logdir= (パス指定)`  
+#### ・`checkpoint_dir= (パス指定)`   
+#### ・`eval_batch_size=1`   
+#### ・`model_variant="mobilenet_v2"`    
+#### ・`eval_crop_size=800`   
+##### Set eval_crop_size = output_stride * k + 1 for your dataset. 
+##### The default value, 513, is set for PASCAL images whose largest image dimension is 512. 
+##### default : 512 
+#### ・`eval_crop_size=1200`  
+##### default : 512
+#### Dataset settings.  
+#### ・`dataset='pepper'`   
+#### ・`eval_split="val"`  
+#### ・`dataset_dir=（パス指定）`    
+#### ・`max_number_of_evaluations=1`    
 
-#### ●Dataset settings.   
-##### ・`dataset='pepper'`   
-##### ・`eval_split="val"`  
-##### ・`dataset_dir="${PASCAL_DATASET}"`    
-##### ・`max_number_of_evaluations=1`    
+### ●エラーメッセージ
+#### Shape mismatch in tuple component 1. Expected [513,513,3], got [800,1200,3] .
 
-### ・エラーメッセージ
-・Shape mismatch in tuple component 1. Expected [513,513,3], got [800,1200,3]  
-Set eval_crop_size = output_stride * k + 1 for your dataset  
-pepperのサイズとPASCAL_VOCのcrop_sizeの違い？  
---eval_crop_size=1025   
---eval_crop_size=2049  で解決? 
+### ●[tf.metric](https://electric-blue-industries.com/wp/machine-learnings/python-modules/python-modules-tensorflow/tf-metrics/)  を用いて評価
 
-### ・メトリックを用いて評価
-[tf.metric](https://electric-blue-industries.com/wp/machine-learnings/python-modules/python-modules-tensorflow/tf-metrics/)   
-tf.metric.accuracy : 正解率, (過去の合計正答数total) / (データ数)
-mean_per_class_accuracy : クラスごとの精度の平均  
-precision : 適合率    
-false_negatives : 偽陰性の総数    
-miou_1.0 : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
+#### ・tf.metric.accuracy : 正解率, (過去の合計正答数total) / (データ数)
+#### ・mean_per_class_accuracy : クラスごとの精度の平均  
+#### ・precision : 適合率    
+#### ・false_negatives : 偽陰性の総数    
+#### ・miou_1.0 : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
 
-・初期の学習済みモデルを用いて，１０回学習させた場合  
+### ●初期の学習済みモデルを用いて，１０回学習させた場合  
+```
 accuracy[0.943350315]  
 mean_per_class_accuracy[0.847709656]  
 precision[0.922471046]  
 false_negatives[0.687992334]  
 miou_1.0[0.75342977]  
-
-・新しい画像を使って，学習させた結果  
+```
+### ●新しい画像を使って，学習させた結果  
+```
 accuracy[0.887568057]  
 mean_per_class_accuracy[0.49432373]     
 precision[0.961355925]  
 false_negatives[0.32001844]   
 miou_1.0[0.441790938]  
-
-・考察
-正解率が下がっているのは，pepperの画像が混じったからか？  
-クラスごとの精度の平均が下がっている．  
-boxの精度も下がっている．  
-学習回数が足りない？アノテーション付けがよくない？  
-
-labelsとpresitionsを標準出力できない理由？  
-長すぎる？何か手続きを飛ばしている？  
-サーバーエラー  
-→ tensorflow.python.framework.errors_impl.InternalError: Failed to create session.  
-
-・eval.pyについて  
-labels : The ground truth values, Tensor("Reshape_8:0", shape=(?,), dtype=int64)    
-predictions : The predicted values, Tensor("Select:0", shape=(?,), dtype=int32)  
-
-tf.contrib.metrics.aggregate_metric_map(metric_map) : tuple型, ({}, {})  
-(tf.contrib.metrics.aggregate_metric_map(metric_map)) : tuple型, ({}, {})  
-
-metrics_to_values : precision/value:0, dtype=float32, {<tensor>, <tensor>}  
-metrics_to_updates : precision/update_op:0, dtype=float32, {<tensor>, <tensor>}  
-metrics_to_updates.values() : dict_values([<tensor>, <tensor>])  
-
-``# Define the evaluation metric.``    
-``metric_map = {}に追加``  
-
-``# metrics_to_values と metrics_to_updates を２つのリストに集計する``  
-``metrics_to_values, metrics_to_updates = (tf.contrib.metrics.aggregate_metric_map(metric_map))``  
-``for metric_name, metric_value in six.iteritems(metrics_to_values):``  
-``slim.summaries.add_scalar_summary(metric_value, metric_name, print_summary=True)``  
-
-・tensorboardで可視化  
-`tensorboard --logdir=./`  
-
-## Visualize  
-### vis.pyのハイパーパラメータについて  
-> --logtostderr  
---dataset='pepper'  
---vis_split="val"  
---model_variant="mobilenet_v2"  
---vis_crop_size=1025  
---vis_crop_size=2049  
---checkpoint_dir="${TRAIN_LOGDIR}"  
---vis_logdir="${VIS_LOGDIR}"  
---dataset_dir="${PASCAL_DATASET}"  
---colormap_type="pascal"  
---max_number_of_iterations=1
-
-## export_model  
-### export_model.pyのハイパーパラメータについて    
- > --logtostderr  
- --checkpoint_path="\${CKPT_PATH}"  
- --export_path="\${EXPORT_PATH}"  
---model_variant="mobilenet_v2"  
---num_classes=22  
---crop_size=513  
---crop_size=513  
---inference_scales=1.0  
-
-## 評価  
-### ・confusion matrix
-### ・Standard mean intersection-over-union （mIOU）メトリック
-#### PASCAL VOC 2012 'val'セット（1449画像）の定量的な結果（75.34%）
+```
 バッチごとに，  
 まず，「(true, pred) : 認識率(%)」の上位3件を表示．  
 また，trueに対する認識率(%)を表示． 
@@ -315,19 +324,37 @@ eval_1
 20_accuracy: 31.177594406731433 % 
 accuracy : 96.09456129700389 %  
 ```
-・true    
-<img src="https://github.com/ikuhiroo/Object-segmentation/blob/master/2007_000033_true.png" width=50%>  
-・pred  
-<img src="https://github.com/ikuhiroo/Object-segmentation/blob/master/2007_000033_pred.png" width=50%>  
+・pepperの画像を加えると，PASCALのクラスに対する認識率が下がる
+→pepper認識器になっている
+#### ・考察
+正解率が下がっているのは，pepperの画像が混じったからか？  
+クラスごとの精度の平均が下がっている．  
+boxの精度も下がっている．  
+学習回数が足りない？アノテーション付けがよくない？  
 
-処理が終わった後，    
-クラスごとの認識率表示させる．  
-```
+## Visualize  
+### ハイパーパラメータ設定  
+#### ・`logtostderr`
+#### ・`dataset='pepper'`  
+#### ・`vis_split="val"`
+#### ・`model_variant="mobilenet_v2"`
+#### ・`vis_crop_size=1025`
+#### ・`vis_crop_size=2049`
+#### ・`checkpoint_dir=（パス指定）`
+#### ・`vis_logdir=（パス指定）`
+#### ・`dataset_dir=（パス指定）`
+#### ・`colormap_type="pascal"`
+#### ・`max_number_of_iterations=1`
 
-```
-・間違え方について  
-edgeの間違えることが多い．  
-
-・pepperの画像を加えると，PASCALのクラスに対する認識率が下がる→pepper認識器になっている
+## export_model  
+### ハイパーパラメータ設定
+#### ・`--logtostderr`
+#### ・`checkpoint_path=（パス指定）`
+#### ・`export_path=（パス指定）"`
+#### ・`model_variant="mobilenet_v2"`
+#### ・`num_classes=22`  
+#### ・`crop_size=513`
+#### ・`crop_size=513`
+#### ・`inference_scales=1.0`
 
 > Written with [StackEdit](https://stackedit.io/).
