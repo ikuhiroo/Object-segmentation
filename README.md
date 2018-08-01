@@ -208,7 +208,7 @@ segment_val : 1492
 #### ・`train_batch_size = 4`  
 ##### The number of images in each batch during training.  
 ##### default : 4
-##### test1 : 12
+##### test1 : 12（？）
 #### ・`fine_tune_batch_norm = True`  
 ##### Set to True if one wants to fine-tune the batch norm parameters in DeepLabv3
 ##### When fine_tune_batch_norm=True, use at least batch size larger than 12  
@@ -395,6 +395,7 @@ Pepper       21_accuracy: 87.54083190904221 %
 {'500<': 83, '<501': 4230, '<401': 12324, '<301': 607, '<201': 94, '<101': 2}
 ```
 ##### →画像サイズを500以下にすることでcrop_sizeを513にできる
+##### Jpegimage, segmentclass, segmentclassrawに関してリサイズする
 ```
 ・max_weight = 500
 ・max_height = 500
