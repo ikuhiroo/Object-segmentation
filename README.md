@@ -3,27 +3,12 @@ Classification :  predict the presence/absence
 Detection : predict the bounding boxes of each object    
 Segmentation :  predict the class of the object containing that pixel or ‘background’  if the pixel does not belong to one of the twenty specified classes.  
 
-## GPUに送るファイル  
-
 ## deeplab(tensorflow)をクローン  
 `$ git clone https://github.com/tensorflow/models.git`  
 
 ## 環境構築， 学習済みモデルの取得  
 `$cd models/research/deeplab `  
 `$sh ./local_test.sh `    
-
-## 自家製のデータセットで試す手順  
-### ＜前処理＞   
-作成中  
-### ＜学習＞  
-作成中
-#### ・export the trained checkpoint.
-#### ・export_model　
-### ＜評価＞  
-作成中  
-### ＜Visualize＞
-作成中
-
 
 ## 学習済みモデルのデータセット（pascal voc 2012）  
 ### ・[pascal voc devkit_doc](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/devkit_doc.pdf)  
@@ -53,7 +38,6 @@ pixel indices correspond to classes in alphabetical order
 > {0: 361560627, 1: 3704393, 2: 1571148, 3: 4384132, 4: 2862913, 5: 3438963, 6: 8696374, 7: 7088203, 8: 12473466, 9: 4975284, 10: 5027769, 11: 6246382, 12: 9379340, 13: 4925676, 14: 5476081, 15: 24995476, 16: 2904902, 17: 4187268, 18: 7091464, 19: 7903243, 20: 4120989, 255: 28568409}) 
 
 ### ●segmentation/SegmentationObject  
-#### ・SegmentationClassとの違い？
 
 ### ●ImageSets/Main  
 #### ・AnnocationsとJPEGImagesのファイル名(拡張子を除く)のpair 
@@ -125,9 +109,17 @@ val-00003-of-00004.tfrecord
 `$ pip install labelme ` 
 #### ・アノテーションツールの使い方
  `$ labelme `  
-→ jsonファイルの作成  
- ` $ python json_to_png.py   `
-→ pngファイルの作成  
+##### 1.	labelmeアプリケーションが開く
+##### 2.「open dir」で対象画像ファイルをまとめて選択
+##### 3.	物体を点で繋いで囲む
+##### 4.	始点と終点を合わせることでラベルを指定できる
+##### 5.	dを入力すると次の画像に移る
+##### →jsonファイルが作成される
+ ` $ python json_to_png.py`
+##### jsonフォルダとsegmentファイルを作り，実行する
+##### →segmentファイル内に pngファイルが作成される  
+##### 新しいクラス名を設定する（pepperの場合は，21を割り当てる）
+##### SegmentationClassフォルダに追加する
 
 ### ●trainvalの分割方法の設定し，ファイルに情報を追加する  
  ` $python create_trainval.py `  
@@ -146,8 +138,7 @@ images_val : 5866
 segment_train_val : 3128  
 segment_train : 1636  
 segment_val : 1492
-
-### ●segmentation_datasetファイルの変更  
+### ●segmentation_dataset.pyの変更  
 #### ・_DATASETS_INFORMATIONの内容に追加  
 ##### cityscapes : _CITYSCAPES_INFORMATION  
 ##### pascal_voc_seg : _PASCAL_VOC_SEG_INFORMATION  
@@ -176,6 +167,7 @@ segment_val : 1492
 ## create tf-recode
 #### `sh tf_convert_voc2012.sh`
 #### ・`WORK_DIR=（パス指定）`
+##### SegmentationClassRawを作成し，tf-recodeに変換する
 
 ## train
 ### ハイパーパラメータ設定（defaultはfine-tuning前の値）
@@ -425,6 +417,19 @@ atrous_rates = 1
 train_batch_size =12
 ```  
 #### ・結果1（`python eval.py`）
+```
+accuracy[0.911649227]
+precision[0.920824647]
+mean_per_class_accuracy[0.631497383]
+miou_1.0[0.551168084]
+```
+#### ・test1と比較
+```
+accuracy[0.887568057]  
+precision[0.961355925]  
+mean_per_class_accuracy[0.49432373]     
+miou_1.0[0.441790938]  
+```
 #### ・結果2（`python eval0.py`）
 ```
 background   0_accuracy: 79.83268837195813 % 
@@ -449,6 +454,31 @@ sofa         18_accuracy: 67.24266055892082 %
 train        19_accuracy: 81.29887659779264 % 
 tv/monitor   20_accuracy: 49.954003233790196 % 
 Pepper       21_accuracy: 91.54952904389178 % 
+```
+#### ・test1と比較
+```
+background   0_accuracy: 96.84267431853029 % 
+aeroplane    1_accuracy: 57.357618018805816 % 
+bicycle      2_accuracy: 0.0 % 
+bird         3_accuracy: 49.55682088565027 % 
+boat         4_accuracy: 16.517761537994804 % 
+bottle       5_accuracy: 0.08028326685488951 % 
+bus          6_accuracy: 72.51021481737355 % 
+car          7_accuracy: 45.66972298631186 % 
+cat          8_accuracy: 75.63807704904475 % 
+chair        9_accuracy: 0.13013601331749589 % 
+cow          10_accuracy: 61.40326484451494 %
+diningtable  11_accuracy: 9.461895429316897 % 
+dog          12_accuracy: 76.36539074135965 % 
+horse        13_accuracy: 68.5181200573232 % 
+motorbike    14_accuracy: 57.87662859525158 % 
+person       15_accuracy: 71.1393828885102 % 
+potted plant 16_accuracy: 0.0 % 
+sheep        17_accuracy: 46.77391369287723 % 
+sofa         18_accuracy: 56.46067461595401 % 
+train        19_accuracy: 65.60469802975989 % 
+tv/monitor   20_accuracy: 40.424908601558336 % 
+Pepper       21_accuracy: 87.54083190904221 % 
 ```
 #### ・考察
 ##### ・pepperの認識率は高くなったが，他のクラスの認識率は向上していない
