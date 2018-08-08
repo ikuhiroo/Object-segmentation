@@ -54,7 +54,6 @@ flags.DEFINE_string('master', '', 'BNS name of the tensorflow server')
 flags.DEFINE_integer('task', 0, 'The task ID.')
 
 # Settings for logging.
-
 flags.DEFINE_string('train_logdir', None,
                     'Where the checkpoint and logs are stored.')
 
@@ -71,7 +70,6 @@ flags.DEFINE_boolean('save_summaries_images', False,
                      'Save sample inputs, labels, and semantic predictions as images to summary.')
 
 # Settings for training strategy.
-
 flags.DEFINE_enum('learning_policy', 'poly', ['poly', 'step'],
                   'Learning rate policy for training.')
 
@@ -114,7 +112,6 @@ flags.DEFINE_boolean('upsample_logits', True,
                      'Upsample logits during training.')
 
 # Settings for fine-tuning the network.
-
 flags.DEFINE_string('tf_initial_checkpoint', None,
                     'The initial checkpoint in tensorflow format.')
 

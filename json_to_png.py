@@ -15,21 +15,14 @@ import PIL.ImageDraw
 import yaml
 
 """
-（変更前）
-WORK_DIR : /Users/1-10robotics/Desktop/tools/labelme-master/labelme/cli
-$ python json_to_png.py /{input}.json -o {output}
-{output}がない場合，{input}_jsonとして保存する
-
-（変更後）
 作成したjsonファイルからsegmentationされたpngファイルを作成する
-JSON_DIR :
-OUTPUT_DIR :
+jsonフォルダ内にツールを用いて作成したjsonファイルを置く
+pngファイルを置くsegmentファイルを置く
 
-（セグメンテーション画像に対して画像処理）
-
+257行目で新しい画像に対するクラスラベルを設定する
 """
-JSON_DIR = Path("/Users/1-10robotics/Desktop/files/segmentationjson")
-OUT_DIR = Path("/Users/1-10robotics/Desktop/files/segment")
+JSON_DIR = Path("/Users/1-10robotics/Desktop/json")
+OUT_DIR = Path("/Users/1-10robotics/Desktop/segment")
 
 def label_colormap(N=256):
 
@@ -217,67 +210,61 @@ def main():
     color_value = defaultdict(lambda: 0)
     json_file_list = list(JSON_DIR.glob("*.json"))
     for i in range(len(json_file_list)):
-        if i==0:
-            # jsonファイルをロード
-            json_file = str(json_file_list[i])
-            print(json_file)
-            data = json.load(open(json_file))
-            if data['imageData']:
-                imageData = data['imageData']
-            else:
-                imagePath = os.path.join(os.path.dirname(json_file), data['imagePath'])
-                with open(imagePath, 'rb') as f:
-                    imageData = f.read()
-                    imageData = base64.b64encode(imageData).decode('utf-8')
-
-            # 画像ファイルをRGBの配列に変換
-            # <class 'numpy.ndarray'>
-            # ex.(673, 576, 3)
-            img = img_b64_to_arr(imageData)
-            # print(img)
-
-            # 背景→ 0 (0, 0, 0), エッジ→ 255 (255, 255, 255)，クラス→1~22
-            # label_name_to_value = {'_background_': 0, '_edge_': 255}
-            label_name_to_value = {'_background_': 0}
-            for shape in data['shapes']:
-                label_name = shape['label']
-                # _background_が含まれている場合，
-                if label_name in label_name_to_value:
-                    label_value = label_name_to_value[label_name]
-                else:
-                    # それ以外のラベルの場合，辞書に追加する
-                    label_value = len(label_name_to_value)
-                    label_name_to_value[label_name] = label_value
-            # print(label_name_to_value)
-
-            # label_values must be dense
-            label_values, label_names = [], []
-            for ln, lv in sorted(label_name_to_value.items(), key=lambda x: x[1]):
-                # ln : 繰り返し回数(init : 0)
-                # lv : ラベル名
-                label_values.append(lv)
-                label_names.append(ln)
-            assert label_values == list(range(len(label_values)))
-
-            # img.shape : (673, 576, 3), lbl.shape : (673, 576)
-            lbl = shapes_to_label(img.shape, data['shapes'], label_name_to_value)
-            # lbl_viz = draw_label(lbl)
-            # lbl_viz = np.where((lbl_viz != 0) & (lbl_viz != 255), 128, lbl_viz).astype('uint8')
-            # lbl_viz = np.where(lbl_viz == 255, 0, lbl_viz).astype('uint8')
-
-            # 22をpepperクラスに割り当てる
-            lbl = np.where((lbl != 0) & (lbl != 255), 22, lbl).astype('uint8')
-            print(lbl.shape)
-            print(lbl.dtype)
-
-            # ファイルの保存
-            PIL.Image.fromarray(lbl).save(osp.join(OUT_DIR, '{}.png'.format(osp.basename(json_file).split(".")[0])))
-            for p in range(len(lbl)):
-                for q in range(len(lbl[p])):
-                        color_value[int(lbl[p][q])] += 1
-            print(color_value)
+        # jsonファイルをロード
+        json_file = str(json_file_list[i])
+        print(json_file)
+        data = json.load(open(json_file))
+        if data['imageData']:
+            imageData = data['imageData']
         else:
-            break
+            imagePath = os.path.join(os.path.dirname(json_file), data['imagePath'])
+            with open(imagePath, 'rb') as f:
+                imageData = f.read()
+                imageData = base64.b64encode(imageData).decode('utf-8')
+
+        # 画像ファイルをRGBの配列に変換
+        # <class 'numpy.ndarray'>
+        # ex.(673, 576, 3)
+        img = img_b64_to_arr(imageData)
+        # print(img)
+
+        # 背景→ 0 (0, 0, 0), エッジ→ 255 (255, 255, 255)，クラス→1~22
+        # label_name_to_value = {'_background_': 0, '_edge_': 255}
+        label_name_to_value = {'_background_': 0}
+        for shape in data['shapes']:
+            label_name = shape['label']
+            # _background_が含まれている場合，
+            if label_name in label_name_to_value:
+                label_value = label_name_to_value[label_name]
+            else:
+                # それ以外のラベルの場合，辞書に追加する
+                label_value = len(label_name_to_value)
+                label_name_to_value[label_name] = label_value
+        # print(label_name_to_value)
+
+        # label_values must be dense
+        label_values, label_names = [], []
+        for ln, lv in sorted(label_name_to_value.items(), key=lambda x: x[1]):
+            # ln : 繰り返し回数(init : 0)
+            # lv : ラベル名
+            label_values.append(lv)
+            label_names.append(ln)
+        assert label_values == list(range(len(label_values)))
+
+        # img.shape : (673, 576, 3), lbl.shape : (673, 576)
+        lbl = shapes_to_label(img.shape, data['shapes'], label_name_to_value)
+
+        # 21をpepperクラスに割り当てる
+        lbl = np.where((lbl != 0) & (lbl != 255), 21, lbl).astype('uint8')
+        print(lbl.shape)
+        print(lbl.dtype)
+
+        # ファイルの保存
+        PIL.Image.fromarray(lbl).save(osp.join(OUT_DIR, '{}.png'.format(osp.basename(json_file).split(".")[0])))
+        for p in range(len(lbl)):
+            for q in range(len(lbl[p])):
+                    color_value[int(lbl[p][q])] += 1
+        print(color_value)
     print('Saved to: %s' % OUT_DIR)
 
 if __name__ == '__main__':

@@ -28,7 +28,7 @@ set -e
 # Move one-level up to tensorflow/models/research directory.
 cd ..
 
-# Update PYTHONPATH.
+# Update PYTHONPATH(slimを利用する).
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 
 # Set up the working environment.
@@ -39,11 +39,11 @@ WORK_DIR="${CURRENT_DIR}/deeplab"
 
 # create TF data
 DATASET_DIR="datasets"
-cd "${WORK_DIR}/${DATASET_DIR}"
+# cd "${WORK_DIR}/${DATASET_DIR}"
 #sh tf_convert_voc2012.sh
 
 # Go back to original directory.
-cd "${CURRENT_DIR}"
+# cd "${CURRENT_DIR}"
 
 # Set up the working directories.
 PASCAL_FOLDER="pepper_pascal_voc_seg"
@@ -71,35 +71,47 @@ PASCAL_DATASET="${WORK_DIR}/${DATASET_DIR}/${PASCAL_FOLDER}/tfrecord"
 #   --log_steps=10 \
 #   --save_interval_secs=1200 \
 #   --save_summaries_secs=600 \
-#   --save_summaries_images=False \
+#   --save_summaries_images=True \
+#   --model_variant="mobilenet_v2" \
 #   --training_number_of_steps="${NUM_ITERATIONS}" \
-#   --train_batch_size=12 \
-#   --train_crop_size=513 \
-#   --train_crop_size=513 \
+#   --train_batch_size=4 \
 #   --upsample_logits=True \
 #   --tf_initial_checkpoint="${INIT_FOLDER}/${CKPT_NAME}/model.ckpt-30000" \
+#   --base_learning_rate=0.0001 \
 #   --initialize_last_layer=False \
 #   --last_layers_contain_logits_only=False \
 #   --fine_tune_batch_norm=True \
-#   --train_split="train" \
-#   --model_variant="mobilenet_v2" \
-#   --atrous_rates=1 \
+#   --train_crop_size=513 \
+#   --train_crop_size=513 \
 #   --output_stride=16 \
 #   --dataset="pepper" \
-#   --dataset_dir="${PASCAL_DATASET}"
+#   --dataset_dir="${PASCAL_DATASET}" \
+#   --train_split="train"
 
-
-# Run evaluation. This performs eval over the full val split (1449 images) and
-# will take a while.
-# Using the provided checkpoint, one should expect mIOU=75.34%.
 python "${WORK_DIR}"/eval0.py \
   --logtostderr \
   --eval_logdir="${EVAL_LOGDIR}" \
   --checkpoint_dir="${TRAIN_LOGDIR}" \
   --eval_batch_size=1 \
   --model_variant="mobilenet_v2" \
-  --eval_crop_size=1025 \
-  --eval_crop_size=2049 \
+  --eval_crop_size=513 \
+  --eval_crop_size=513 \
+  --dataset='pepper' \
+  --eval_split="val" \
+  --dataset_dir="${PASCAL_DATASET}" \
+  --max_number_of_evaluations=1
+
+# Run evaluation. This performs eval over the full val split (1449 images) and
+# will take a while.
+# Using the provided checkpoint, one should expect mIOU=75.34%.
+python "${WORK_DIR}"/eval.py \
+  --logtostderr \
+  --eval_logdir="${EVAL_LOGDIR}" \
+  --checkpoint_dir="${TRAIN_LOGDIR}" \
+  --eval_batch_size=1 \
+  --model_variant="mobilenet_v2" \
+  --eval_crop_size=513 \
+  --eval_crop_size=513 \
   --dataset='pepper' \
   --eval_split="val" \
   --dataset_dir="${PASCAL_DATASET}" \
@@ -111,8 +123,8 @@ python "${WORK_DIR}"/eval0.py \
 #   --dataset='pepper' \
 #   --vis_split="val" \
 #   --model_variant="mobilenet_v2" \
-#   --vis_crop_size=1025 \
-#   --vis_crop_size=2049 \
+#   --vis_crop_size=513 \
+#   --vis_crop_size=513 \
 #   --checkpoint_dir="${TRAIN_LOGDIR}" \
 #   --vis_logdir="${VIS_LOGDIR}" \
 #   --dataset_dir="${PASCAL_DATASET}" \

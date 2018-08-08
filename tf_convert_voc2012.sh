@@ -37,16 +37,21 @@ set -e
 
 CURRENT_DIR=$(pwd)
 WORK_DIR="./pepper_pascal_voc_seg"
+# WORK_DIR="./pascal_voc_seg"
+
 
 cd "${CURRENT_DIR}"
 # Root path for PASCAL VOC 2012 dataset.
 PEPPER_PASCAL_ROOT="${WORK_DIR}/VOCdevkit/VOC2012"
 
 # Remove the colormap in the ground truth annotations.
+# colormap付きのセグメンテーション画像
 SEG_FOLDER="${PEPPER_PASCAL_ROOT}/SegmentationClass"
+# colormapなしのセグメンテーション画像
 SEMANTIC_SEG_FOLDER="${PEPPER_PASCAL_ROOT}/SegmentationClassRaw"
 
 echo "Removing the color map in ground truth annotations..."
+# PIL → ndarrayでcolorをremoveできる
 python3 ./remove_gt_colormap.py \
   --original_gt_folder="${SEG_FOLDER}" \
   --output_dir="${SEMANTIC_SEG_FOLDER}"

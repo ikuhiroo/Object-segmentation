@@ -153,8 +153,7 @@ def main(unused_argv):
 
     # mean_per_class_accuracy : クラスごとの精度の平均を計算します
     metric_map["mean_per_class_accuracy"] = tf.metrics.mean_per_class_accuracy(labels=labels, predictions=predictions, num_classes=dataset.num_classes, weights=weights)
-    # metric_map["misclassification"] = tf.not_equal(tf.cast(predictions, tf.float32), tf.cast(labels, tf.float32))
-
+    
     """metrics_to_values と metrics_to_updates を２つのリストに集計する
     tf.contrib.metrics.aggregate_metric_map(metric_map) : tuple型, ({}, {})
     (tf.contrib.metrics.aggregate_metric_map(metric_map)) : tuple型, ({}, {})
@@ -176,36 +175,6 @@ def main(unused_argv):
     num_eval_iters = None
     if FLAGS.max_number_of_evaluations > 0:
       num_eval_iters = FLAGS.max_number_of_evaluations
-
-    # Session開始
-    # saver = tf.train.Saver()
-    # with tf.Session() as sess:
-    #   sess.run(tf.global_variables_initializer())
-    #   sess.run(tf.local_variables_initializer())
-    #
-    #   # ckptオブジェクト生成
-    #   ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir+'/')
-    #   if ckpt:
-    #       last_model = ckpt.model_checkpoint_path
-    #       print('checkpoint file found: {}'.format(last_model))
-    #       saver.restore(sess, last_model)
-    #   else:
-    #       print('No checkpoint file found')
-    #
-    #   print('ok')
-    #   for batch_id in range(num_batches):
-    #     print('ok')
-    #     sess.run(predictions)
-    #     print('ok')
-    #
-    #   # evaluation.evaluation_loop
-    #   # evaluate_repeatedlyを真似して書くのが早い
-    #   #
-    #   eval_step = get_or_create_eval_step()
-    #   hooks = hooks or []
-    #   if eval_ops is not None:
-    #     update_eval_step = state_ops.assign_add(eval_step, 1)
-
 
     # モデルを評価する
     # sessionがevaluation_loopで呼ばれているため，うまく動いていない

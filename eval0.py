@@ -298,11 +298,14 @@ def evaluate_repeatedly(checkpoint_dir,
       logging.info('Starting evaluation at ' + time.strftime('%Y-%m-%d-%H:%M:%S', time.gmtime()))
       if eval_ops is not None:
         class_accuracy = defaultdict(list) #class : accuracy
+        result_txt = ''
+        result_1_txt = ''
         while not session.should_stop():
           # sessionをrunする
           _labels, _predictions, _cnt = session.run(eval_ops, feed_dict)
 
           print('eval_{}'.format(_cnt))
+          result_1_txt = result_1_txt + 'eval_{} \n'.format(_cnt)
 
           # リストの要素ごとに比較をする
           result = {} # (true : pred) : cnt
@@ -333,15 +336,18 @@ def evaluate_repeatedly(checkpoint_dir,
           misclassificated_pair_1 = result[0][0]
           misclassificated_rate_1 = (result[0][1]/sum(dict(result).values()))*100
 
-          misclassificated_pair_2 = result[1][0]
-          misclassificated_rate_2 = (result[1][1]/sum(dict(result).values()))*100
+          # misclassificated_pair_2 = result[1][0]
+          # misclassificated_rate_2 = (result[1][1]/sum(dict(result).values()))*100
 
-          misclassificated_pair_3 = result[2][0]
-          misclassificated_rate_3 = (result[2][1]/sum(dict(result).values()))*100
+          # misclassificated_pair_3 = result[2][0]
+          # misclassificated_rate_3 = (result[2][1]/sum(dict(result).values()))*100
 
           print('{} : {} %'.format(misclassificated_pair_1, misclassificated_rate_1))
-          print('{} : {} %'.format(misclassificated_pair_2, misclassificated_rate_2))
-          print('{} : {} %'.format(misclassificated_pair_3, misclassificated_rate_3))
+          # print('{} : {} %'.format(misclassificated_pair_2, misclassificated_rate_2))
+          # print('{} : {} %'.format(misclassificated_pair_3, misclassificated_rate_3))
+          result_1_txt = result_1_txt + '{} : {} % \n'.format(misclassificated_pair_1, misclassificated_rate_1)
+          # result_1_txt = result_1_txt + '{} : {} % \n'.format(misclassificated_pair_2, misclassificated_rate_2)
+          # result_1_txt = result_1_txt + '{} : {} % \n'.format(misclassificated_pair_3, misclassificated_rate_3)
 
           # mean_per_class_accuracy : クラスごとの精度の平均を計算します
           for i in range(len(result_all.keys())):
@@ -349,23 +355,31 @@ def evaluate_repeatedly(checkpoint_dir,
             try:
               accuracy = (true_cnt[key]/result_all[key])*100
               print('{}_accuracy: {} %'.format(key, accuracy))
+              result_1_txt = result_1_txt + '{}_accuracy: {} % \n'.format(key, accuracy)
             except:
               accuracy = 0
               print('{}_accuracy: {} %'.format(key, accuracy))
+              result_1_txt = result_1_txt + '{}_accuracy: {} % \n\n'.format(key, accuracy)
 
             class_accuracy[key].append(accuracy)
 
           # accuracy : 予測がラベルに一致する頻度を計算
           accuracy = (true_len / len(_labels))*100
           print("accuracy : {} %".format(accuracy))
+          result_1_txt = result_1_txt + "accuracy : {} % \n\n".format(accuracy)
 
           print(' ')
+          with open('./deeplab/result_1.txt', mode='w') as f:
+            f.write(result_1_txt)
 
-      # クラス平均
-      for i in range(len(list(class_accuracy.keys()))):
-        key = list(class_accuracy.keys())[i]
-        ave_accuracy = sum(class_accuracy[key])/len(class_accuracy[key])
-        print('{}_accuracy: {} %'.format(key, ave_accuracy))
+        # クラス平均
+        for i in range(len(list(class_accuracy.keys()))):
+          key = list(class_accuracy.keys())[i]
+          ave_accuracy = sum(class_accuracy[key])/len(class_accuracy[key])
+          result_txt = result_txt + '{}_accuracy: {} % \n\n'.format(key, ave_accuracy)
+
+        with open('./deeplab/result.txt', mode='w') as f:
+          f.write(result_txt)
 
       logging.info('Finished evaluation at ' + time.strftime('%Y-%m-%d-%H:%M:%S', time.gmtime()))
     num_evaluations += 1
@@ -375,22 +389,6 @@ def evaluate_repeatedly(checkpoint_dir,
       return final_ops_hook.final_ops_values
 
   return final_ops_hook.final_ops_values
-
-# eval_1
-# (0, 12) : 29.17293496134066 %
-# accuracy : 97.27810115582855
-# a = {}
-# a[(1, 2)] = 1
-# a[(2, 3)] = 2
-# a[(1, 4)] = 3
-# a[(4, 5)] = 4
-# a[(1, 6)] = 5
-# a[(6, 7)] = 6
-# # b = sorted(a.items(), key=lambda x:x[1], reverse=True)
-# for i in range(len(a.values())):
-#   print(list(a.items())[i][0][0])
-# sum(dict(b).values())
-# b[0][0]
 
 def evaluation_loop(master,
                     checkpoint_dir,
@@ -628,30 +626,6 @@ def main(unused_argv):
     # aの要素がtrue : b(0)を返す，false : c(そのまま)を返す
     labels = tf.where(tf.equal(labels, dataset.ignore_label), tf.zeros_like(labels), labels)
 
-    # """Define the evaluation metric."""
-    # predictions_tag = 'miou'
-    # for eval_scale in FLAGS.eval_scales:
-    #   predictions_tag += '_' + str(eval_scale)
-    # if FLAGS.add_flipped_images:
-    #   predictions_tag += '_flipped'
-    #
-    # metric_map = {}
-    # # IoU : boxに対して, 目的となる領域(ground truth box)がどれだけ含まれているか
-    # metric_map[predictions_tag] = tf.metrics.mean_iou(labels=labels, predictions=predictions, num_classes=dataset.num_classes, weights=weights)
-    #
-    # # accuracy : 予測がラベルに一致する頻度を計算
-    # metric_map["accuracy"] = tf.metrics.accuracy(labels=labels, predictions=predictions, weights=weights)
-    #
-    # # precision : 適合率
-    # # metric_map["precision"] = tf.metrics.precision(labels=labels, predictions=predictions, weights=weights)
-    #
-    # # mean_per_class_accuracy : クラスごとの精度の平均を計算します
-    # metric_map["mean_per_class_accuracy"] = tf.metrics.mean_per_class_accuracy(labels=labels, predictions=predictions, num_classes=dataset.num_classes, weights=weights)
-    #
-    # metrics_to_values, metrics_to_updates = (tf.contrib.metrics.aggregate_metric_map(metric_map))
-    # for metric_name, metric_value in six.iteritems(metrics_to_values):
-    #   slim.summaries.add_scalar_summary(metric_value, metric_name, print_summary=True)
-
     """バッチサイズを設定する"""
     num_batches = int(math.ceil(dataset.num_samples / float(FLAGS.eval_batch_size)))
     tf.logging.info('Eval num images %d', dataset.num_samples) # 1
@@ -679,35 +653,3 @@ if __name__ == '__main__':
   flags.mark_flag_as_required('eval_logdir')
   flags.mark_flag_as_required('dataset_dir')
   tf.app.run()
-
-
-# eval1 (14, 14)
-# eval_1 = [[143783, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [7814, 23123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [1876153, 832, 5249, 239, 4137, 1488, 16677, 14683, 5106, 21, 801, 5, 29, 0]]
-
-# (13, 13)
-# eval_1 = [[2019936, 917, 5249, 239, 4137, 1488, 16677, 14683, 5106, 21, 801, 5, 29],
-#           [7814, 23123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
